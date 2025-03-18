@@ -19,7 +19,7 @@ def get_project_root():
     """Proje kök dizinini döndürür."""
     current_path = Path(os.path.abspath(__file__))
     # src/data/data_loader.py'dan 2 seviye yukarı çıkıyoruz
-    project_root = current_path.parent
+    project_root = current_path.parent.parent.parent
     return project_root
 
 
@@ -36,7 +36,7 @@ def load_it_salary_data(file_path=None):
     if file_path is None:
         # Varsayılan dosya yolu
         project_root = get_project_root()
-        file_path = os.path.join(project_root, 'data', 'raw', 'turkiye_it_sektoru_calisanlari.csv')
+        file_path = os.path.join(project_root, 'data', 'turkiye_it_sektoru_calisanlari.csv')
     
     try:
         logger.info(f"IT sektörü maaş verileri yükleniyor: {file_path}")
@@ -236,6 +236,67 @@ def save_model_results(model_name, metrics, feature_importance=None, model_param
     except Exception as e:
         logger.error(f"Model sonuçları kaydedilirken hata oluştu: {str(e)}")
         raise
+
+
+def load_test_employee(file_path=None):
+    """
+    Test için bir IT çalışanı verisi yükler.
+    
+    Args:
+        file_path (str, optional): Veri dosyasının yolu. Belirtilmezse örnek bir çalışan oluşturulur.
+        
+    Returns:
+        pandas.DataFrame: Yüklenen test çalışan verisi
+    """
+    if file_path and os.path.exists(file_path):
+        try:
+            logger.info(f"Test çalışan verisi yükleniyor: {file_path}")
+            
+            # Dosya uzantısına göre yükleme yöntemi
+            file_ext = os.path.splitext(file_path)[1].lower()
+            
+            if file_ext == '.csv':
+                employee_df = pd.read_csv(file_path)
+            elif file_ext in ['.xls', '.xlsx']:
+                employee_df = pd.read_excel(file_path)
+            elif file_ext == '.json':
+                employee_df = pd.read_json(file_path)
+            else:
+                raise ValueError(f"Desteklenmeyen dosya uzantısı: {file_ext}")
+            
+            logger.info(f"Test çalışan verisi başarıyla yüklendi. Boyut: {employee_df.shape}")
+            return employee_df
+            
+        except Exception as e:
+            logger.error(f"Test çalışan verisi yüklenirken hata oluştu: {str(e)}")
+            logger.info("Varsayılan test çalışanı oluşturuluyor...")
+    
+    # Örnek bir çalışan oluştur
+    logger.info("Örnek test çalışanı oluşturuluyor")
+    
+    test_employee = {
+        "Cinsiyet": ["Erkek"],
+        "Yaş": [30],
+        "Şehir": ["İstanbul"],
+        "İlçe": ["Kadıköy"],
+        "Rol_Kategorisi": ["Yazılım Geliştirme"],
+        "Rol": ["Full-Stack Geliştirici"],
+        "Kıdem": ["Mid."],
+        "Deneyim_Yıl": [4.5],
+        "Eğitim_Seviyesi": ["Lisans"],
+        "Eğitim_Alanı": ["Bilgisayar Mühendisliği"],
+        "Çalışma_Şekli": ["Tam Zamanlı"],
+        "Uzaktan_Çalışma_Oranı": [20],
+        "Ana_Programlama_Dili": ["Python"],
+        "İngilizce_Seviyesi": ["İleri"],
+        "Toplam_Proje_Sayısı": [12],
+        "Teknik_Beceri_Puanı": [75],
+        "Soft_Skill_Puanı": [65]
+    }
+    
+    employee_df = pd.DataFrame(test_employee)
+    logger.info("Örnek test çalışanı oluşturuldu")
+    return employee_df
 
 
 def split_data_with_time(df, date_column, test_size=0.2, valid_size=0.2):
@@ -439,67 +500,6 @@ def load_data_splits(split_folder):
         raise
 
 
-def load_test_employee(file_path=None):
-    """
-    Test için bir IT çalışanı verisi yükler.
-    
-    Args:
-        file_path (str, optional): Veri dosyasının yolu. Belirtilmezse örnek bir çalışan oluşturulur.
-        
-    Returns:
-        pandas.DataFrame: Yüklenen test çalışan verisi
-    """
-    if file_path and os.path.exists(file_path):
-        try:
-            logger.info(f"Test çalışan verisi yükleniyor: {file_path}")
-            
-            # Dosya uzantısına göre yükleme yöntemi
-            file_ext = os.path.splitext(file_path)[1].lower()
-            
-            if file_ext == '.csv':
-                employee_df = pd.read_csv(file_path)
-            elif file_ext in ['.xls', '.xlsx']:
-                employee_df = pd.read_excel(file_path)
-            elif file_ext == '.json':
-                employee_df = pd.read_json(file_path)
-            else:
-                raise ValueError(f"Desteklenmeyen dosya uzantısı: {file_ext}")
-            
-            logger.info(f"Test çalışan verisi başarıyla yüklendi. Boyut: {employee_df.shape}")
-            return employee_df
-            
-        except Exception as e:
-            logger.error(f"Test çalışan verisi yüklenirken hata oluştu: {str(e)}")
-            logger.info("Varsayılan test çalışanı oluşturuluyor...")
-    
-    # Örnek bir çalışan oluştur
-    logger.info("Örnek test çalışanı oluşturuluyor")
-    
-    test_employee = {
-        "Cinsiyet": ["Erkek"],
-        "Yaş": [30],
-        "Şehir": ["İstanbul"],
-        "İlçe": ["Kadıköy"],
-        "Rol_Kategorisi": ["Yazılım Geliştirme"],
-        "Rol": ["Full-Stack Geliştirici"],
-        "Kıdem": ["Mid."],
-        "Deneyim_Yıl": [4.5],
-        "Eğitim_Seviyesi": ["Lisans"],
-        "Eğitim_Alanı": ["Bilgisayar Mühendisliği"],
-        "Çalışma_Şekli": ["Tam Zamanlı"],
-        "Uzaktan_Çalışma_Oranı": [20],
-        "Ana_Programlama_Dili": ["Python"],
-        "İngilizce_Seviyesi": ["İleri"],
-        "Toplam_Proje_Sayısı": [12],
-        "Teknik_Beceri_Puanı": [75],
-        "Soft_Skill_Puanı": [65]
-    }
-    
-    employee_df = pd.DataFrame(test_employee)
-    logger.info("Örnek test çalışanı oluşturuldu")
-    return employee_df
-
-
 def combine_salary_with_economic_data(salary_df, economic_data_dfs, date_column='İşe_Başlama_Tarihi'):
     """
     Maaş verileriyle ekonomik verileri birleştirir.
@@ -606,7 +606,7 @@ def create_sample_data(n=100, random_state=42):
     kidemler = ["Jr.", "Mid.", "Sr.", "Lead"]
     egitim_seviyeleri = ["Önlisans", "Lisans", "Yüksek Lisans", "Doktora"]
     
-    # Veri seti
+# Veri seti
     data = {
         "Cinsiyet": np.random.choice(cinsiyetler, size=n, p=[0.7, 0.3]),
         "Yaş": np.random.randint(22, 50, size=n),

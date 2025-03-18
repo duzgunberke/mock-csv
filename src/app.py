@@ -12,17 +12,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 from PIL import Image
 
-# src klasörünü Python yoluna ekle
-src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
-sys.path.append(src_dir)
+# Add the parent directory to the Python path to make imports work
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 
-from src.data.data_loader import (
+# Now import modules using relative paths
+from data.data_loader import (
     get_project_root, load_it_salary_data, load_test_employee, save_model_results
 )
-from src.data.preprocess import (
+from data.preprocess import (
     prepare_it_salary_data, feature_engineering_it_salary
 )
-from src.models.predict_model import (
+from models.predict_model import (
     predict_salary, load_model, load_preprocessor,
     compare_to_market_average, generate_salary_recommendation
 )
@@ -762,10 +764,8 @@ def show_salary_prediction(employee_data, model, preprocessor):
             if st.button("📊 Piyasa Analizleri", use_container_width=True):
                 st.info("Piyasa analizleri görüntüleniyor...")
                 # Piyasa analizleri fonksiyonu burada çağrılabilir
-        
     except Exception as e:
-        st.error(f"Maaş tahmini sırasında bir hata oluştu: {str(e)}")
-
+        st.error(f"Maaş tahmini sırasında bir hata oluştu: {str(e)}")            
 
 def show_dashboard():
     """
@@ -1040,4 +1040,4 @@ def main():
         show_about()
 
 if __name__ == "__main__":
-    main()
+    main()        
