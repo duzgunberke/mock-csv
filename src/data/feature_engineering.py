@@ -1,0 +1,1 @@
+# Öznitelik mühendisliği işlevleri

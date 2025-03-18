@@ -1,0 +1,1 @@
+# Öznitelik oluşturma işlevleri
