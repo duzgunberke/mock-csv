@@ -1,0 +1,32 @@
+{
+    "model_name": "dt",
+    "timestamp": "20250319_103658",
+    "metrics": {
+        "test_mse": 16513632.4085,
+        "test_rmse": 4063.6968893484172,
+        "test_mae": 2655.3295,
+        "test_r2": 0.9709859538124407,
+        "test_mape": 6.984460794339925,
+        "train_mse": 0.0,
+        "train_rmse": 0.0,
+        "train_mae": 0.0,
+        "train_r2": 1.0,
+        "train_mape": 0.0,
+        "overfitting_ratio_rmse": 0.0,
+        "overfitting_ratio_r2": 1.0298810153469673
+    },
+    "parameters": {
+        "ccp_alpha": 0.0,
+        "criterion": "squared_error",
+        "max_depth": null,
+        "max_features": null,
+        "max_leaf_nodes": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "random_state": 42,
+        "splitter": "best"
+    }
+}
