@@ -12,7 +12,13 @@ def create_directory_structure():
         'src',
         'src/data',
         'src/models',
-        'src/visualization'
+        'src/visualization',
+        'models',
+        'models/preprocessing',
+        'reports',
+        'reports/figures',
+        'data/predictions',
+        'data/processed'
     ]
     
     for directory in directories:
@@ -32,6 +38,17 @@ def run_seed_script():
         print("✅ Sample data generated successfully!")
     except subprocess.CalledProcessError:
         print("❌ Error running seed.py script")
+        return False
+    return True
+
+def train_model():
+    """Train the salary prediction model"""
+    print("Training salary prediction model...")
+    try:
+        subprocess.run([sys.executable, 'src/train_and_save_models.py'], check=True)
+        print("✅ Model trained and saved successfully!")
+    except subprocess.CalledProcessError:
+        print("❌ Error training model")
         return False
     return True
 
@@ -56,6 +73,13 @@ def setup_project():
         print(f"✅ Copied {csv_source} to {csv_dest}")
     else:
         print(f"❌ {csv_source} not found. Manual data setup required.")
+    
+    # Train the model
+    if train_model():
+        print("✅ Model training completed successfully!")
+    else:
+        print("❌ Model training failed. Setup incomplete.")
+        return
     
     print("\nProject setup completed!")
     print(f"\nTo run the application, use:\n\n    streamlit run src/app.py\n")

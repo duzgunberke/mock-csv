@@ -9,7 +9,6 @@ from sklearn.ensemble import VotingRegressor, StackingRegressor, BaggingRegresso
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
 from datetime import datetime
 
 # src klasörünü Python yoluna ekle
@@ -249,7 +248,7 @@ def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
     weights = []
     for model_name, model in models_dict.items():
         y_pred = model.predict(X_test)
-        r2 = r2_score(y_test, y_pred)
+        r2 = calculate_metrics(y_test, y_pred)['r2']
         weights.append(max(0.1, r2))  # Minimum 0.1 ağırlık
     
     # Ağırlıkları normalize et
@@ -410,6 +409,7 @@ if __name__ == "__main__":
         )
         
         y_pred = voting_ensemble.predict(X_test)
+        from sklearn.metrics import mean_squared_error
         mse = mean_squared_error(y_test, y_pred)
         
         print(f"Oylama modeli MSE: {mse:.4f}")

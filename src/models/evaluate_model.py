@@ -16,8 +16,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.dirname(os.path.dirname(script_dir))
 sys.path.append(src_dir)
 
-from src.data.data_loader import get_project_root, load_data_splits
-from src.models.train_model import load_model
+from src.data.data_loader import get_project_root
 
 # Loglama yapılandırması
 logging.basicConfig(
@@ -359,9 +358,6 @@ def compare_models(model_metrics, output_dir=None):
     plt.close()
     
     visualizations['r2_comparison'] = r2_comparison_path
-    
-    # 3. Tüm metrikler için radar grafiği
-    # (isteğe bağlı, karmaşık bir görselleştirme)
     
     logger.info("Model karşılaştırması tamamlandı")
     return comparison_df, visualizations
