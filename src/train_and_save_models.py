@@ -17,11 +17,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.dirname(script_dir)
 sys.path.append(src_dir)
 
-from src.data.data_loader import get_project_root, load_it_salary_data
-from src.data.preprocess import prepare_it_salary_data, prepare_data_for_modeling
-from src.models.train_model import train_and_evaluate_all_models
-from src.models.evaluate_model import compare_models
-from src.models.ensemble_models import train_all_ensembles, get_best_ensemble_model, save_ensemble_model
+from data.data_loader import get_project_root, load_it_salary_data
+from data.preprocess import prepare_it_salary_data, prepare_data_for_modeling
+from models.train_model import train_and_evaluate_all_models
+from models.evaluate_model import compare_models
+from models.ensemble_models import train_all_ensembles, get_best_ensemble_model, save_ensemble_model
 
 # Loglama yapılandırması
 logging.basicConfig(
@@ -87,10 +87,40 @@ def train_models(data_path=None, save_dir=None, random_state=42):
     )
     
     # En iyi temel modeli logla
+    # train_model.py tarafından döndürülen sütun adlarını kontrol et ve ona göre kullan
     best_model_name = comparison_df.iloc[0]['Model']
-    best_mape = comparison_df.iloc[0]['MAPE (%)']
-    best_r2 = comparison_df.iloc[0]['R²']
+    
+    # KeyError hatası düzeltmesi için sütun adlarını kontrol ediyoruz
+    if 'MAPE (%)' in comparison_df.columns:
+        best_mape = comparison_df.iloc[0]['MAPE (%)']
+    elif 'Test MAPE (%)' in comparison_df.columns:
+        best_mape = comparison_df.iloc[0]['Test MAPE (%)']
+    else:
+        # Diğer olası sütun adları
+        mape_columns = [col for col in comparison_df.columns if 'mape' in col.lower()]
+        if mape_columns:
+            best_mape = comparison_df.iloc[0][mape_columns[0]]
+        else:
+            best_mape = 0
+            logger.warning("MAPE sütunu bulunamadı, değer 0 olarak atandı.")
+    
+    # R² sütunu için de benzer kontrol
+    if 'R²' in comparison_df.columns:
+        best_r2 = comparison_df.iloc[0]['R²']
+    elif 'Test R²' in comparison_df.columns:
+        best_r2 = comparison_df.iloc[0]['Test R²']
+    else:
+        r2_columns = [col for col in comparison_df.columns if 'r2' in col.lower() or 'r²' in col.lower()]
+        if r2_columns:
+            best_r2 = comparison_df.iloc[0][r2_columns[0]]
+        else:
+            best_r2 = 0
+            logger.warning("R² sütunu bulunamadı, değer 0 olarak atandı.")
+    
     logger.info(f"En iyi temel model: {best_model_name}, MAPE: {best_mape:.2f}%, R²: {best_r2:.4f}")
+    
+    # Debug için sütun isimlerini yazdır
+    logger.info(f"comparison_df sütun isimleri: {comparison_df.columns.tolist()}")
     
     # Topluluk modellerini eğit
     logger.info("Topluluk modelleri eğitiliyor...")

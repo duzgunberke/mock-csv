@@ -1,0 +1,25 @@
+{
+    "model_name": "adaboost",
+    "timestamp": "20250319_032344",
+    "metrics": {
+        "test_mse": 49875160.120342925,
+        "test_rmse": 7062.234782301061,
+        "test_mae": 5721.771612781205,
+        "test_r2": 0.9123705697482585,
+        "test_mape": 23.807474294741127,
+        "train_mse": 47548688.23857322,
+        "train_rmse": 6895.555687439064,
+        "train_mae": 5644.99226410404,
+        "train_r2": 0.9170483793053888,
+        "train_mape": 24.044435471378062,
+        "overfitting_ratio_rmse": 0.9763985338918896,
+        "overfitting_ratio_r2": 1.0051270938719792
+    },
+    "parameters": {
+        "estimator": null,
+        "learning_rate": 1.0,
+        "loss": "linear",
+        "n_estimators": 50,
+        "random_state": 42
+    }
+}

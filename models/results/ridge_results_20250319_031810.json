@@ -1,0 +1,28 @@
+{
+    "model_name": "ridge",
+    "timestamp": "20250319_031810",
+    "metrics": {
+        "test_mse": 14563505.110636864,
+        "test_rmse": 3816.2160723204424,
+        "test_mae": 2750.8196782889677,
+        "test_r2": 0.97441227953486,
+        "test_mape": 9.703836826390644,
+        "train_mse": 271090.47857341974,
+        "train_rmse": 520.6634984070035,
+        "train_mae": 384.70628941289345,
+        "train_r2": 0.9995270659320881,
+        "train_mape": 1.4397911039728182,
+        "overfitting_ratio_rmse": 0.13643449127093454,
+        "overfitting_ratio_r2": 1.0257742917702317
+    },
+    "parameters": {
+        "alpha": 1.0,
+        "copy_X": true,
+        "fit_intercept": true,
+        "max_iter": null,
+        "positive": false,
+        "random_state": null,
+        "solver": "auto",
+        "tol": 0.0001
+    }
+}
