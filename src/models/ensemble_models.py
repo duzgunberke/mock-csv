@@ -203,7 +203,7 @@ def create_ensemble_from_trained_models(X_train, y_train, models_dict, ensemble_
 
 
 def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
-                      base_models=['mlr', 'dt', 'rf', 'ridge'], save_models_flag=True, random_state=42):
+                      base_models=['mlr', 'rf'], save_models_flag=True, random_state=42):
     """
     Tüm topluluk modellerini eğitir ve değerlendirir.
     
@@ -213,7 +213,7 @@ def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
         X_test (numpy.ndarray): Test verisi özellikleri
         y_test (numpy.ndarray): Test verisi hedef değişkeni
         models_dict (dict, optional): Eğitilmiş modeller sözlüğü. Verilmezse yeni modeller eğitilir.
-        base_models (list): Temel model isimleri
+        base_models (list): Temel model isimleri - en iyi 2 modeli kullan
         save_models_flag (bool): Modeller kaydedilecek mi?
         random_state (int): Rastgele sayı üreteci için tohum değeri
         
@@ -224,11 +224,13 @@ def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
     """
     logger.info("Tüm topluluk modelleri eğitiliyor ve değerlendiriliyor")
     
-    # Eğitilmiş modeller verilmemişse yeni modeller eğit
-    if models_dict is None:
-        logger.info("Temel modeller eğitiliyor")
+    # Sadece belirtilen modelleri kullan (daha az sayıda)
+    if models_dict is not None:
+        # Sadece base_models'da belirtilen modelleri al
+        models_dict = {k: v for k, v in models_dict.items() if k in base_models}
+    else:
+        # Yeni modeller oluştur (sadece belirtilenler)
         models_dict = {}
-        
         for model_name in base_models:
             model = train_model(X_train, y_train, model_name=model_name, random_state=random_state)
             models_dict[model_name] = model
@@ -243,41 +245,21 @@ def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
     )
     ensembles['voting'] = voting_ensemble
     
-    # 2. Oylama tabanlı topluluk (ağırlıklı)
-    # Ağırlıkları belirlemek için test verisindeki başarıya göre hesapla
-    weights = []
-    for model_name, model in models_dict.items():
-        y_pred = model.predict(X_test)
-        r2 = calculate_metrics(y_test, y_pred)['r2']
-        weights.append(max(0.1, r2))  # Minimum 0.1 ağırlık
+    # 2. Yığınlama tabanlı topluluk (meta model: Ridge)
+    # Daha az cross-validation ile
+    from sklearn.ensemble import StackingRegressor
+    from sklearn.linear_model import Ridge
     
-    # Ağırlıkları normalize et
-    weights = np.array(weights) / sum(weights)
-    
-    weighted_voting_ensemble = create_ensemble_from_trained_models(
-        X_train, y_train, models_dict, ensemble_type='voting', weights=weights
+    estimators = [(name, model) for name, model in models_dict.items()]
+    stacking_ensemble = StackingRegressor(
+        estimators=estimators,
+        final_estimator=Ridge(),
+        cv=2  # Cross-validation sayısını azalt
     )
-    ensembles['weighted_voting'] = weighted_voting_ensemble
-    
-    # 3. Yığınlama tabanlı topluluk (meta model: Ridge)
-    stacking_ensemble = create_ensemble_from_trained_models(
-        X_train, y_train, models_dict, ensemble_type='stacking', meta_model=Ridge()
-    )
+    stacking_ensemble.fit(X_train, y_train)
     ensembles['stacking'] = stacking_ensemble
     
-    # 4. Torbalama tabanlı topluluk (DecisionTree tabanlı)
-    dt_base = DecisionTreeRegressor(random_state=random_state)
-    bagging_ensemble = create_bagging_ensemble(
-        dt_base, n_estimators=50, random_state=random_state
-    )
-    bagging_ensemble.fit(X_train, y_train)
-    ensembles['bagging'] = bagging_ensemble
-    
-    # 5. Güçlendirme tabanlı topluluk (AdaBoost)
-    boosting_ensemble = create_boosting_ensemble(
-        X_train, y_train, base_estimator='dt', n_estimators=50, random_state=random_state
-    )
-    ensembles['boosting'] = boosting_ensemble
+    # Diğer ensemble modelleri kaldırıldı (bagging, weighted_voting ve boosting)
     
     # Tüm modelleri değerlendir
     logger.info("Topluluk modelleri değerlendiriliyor")
@@ -312,10 +294,10 @@ def train_all_ensembles(X_train, y_train, X_test, y_test, models_dict=None,
     comparison_df = comparison_df.sort_values('MAPE (%)', ascending=True)
     
     logger.info("Tüm topluluk modelleri eğitildi ve değerlendirildi")
-    logger.info(f"En iyi topluluk modeli: {comparison_df.iloc[0]['Model']}, MAPE: {comparison_df.iloc[0]['MAPE (%)']:.2f}%, R²: {comparison_df.iloc[0]['R²']:.4f}")
+    if not comparison_df.empty:
+        logger.info(f"En iyi topluluk modeli: {comparison_df.iloc[0]['Model']}, MAPE: {comparison_df.iloc[0]['MAPE (%)']:.2f}%, R²: {comparison_df.iloc[0]['R²']:.4f}")
     
     return ensembles, all_metrics, comparison_df
-
 
 def get_best_ensemble_model(ensembles, metrics, criteria='mape'):
     """
