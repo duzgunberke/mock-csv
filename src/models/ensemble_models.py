@@ -11,7 +11,6 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
 from datetime import datetime
 
-# src klasörünü Python yoluna ekle
 script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.dirname(os.path.dirname(script_dir))
 sys.path.append(src_dir)
@@ -20,7 +19,6 @@ from src.data.data_loader import get_project_root
 from src.models.train_model import get_model_class, train_model, save_model
 from src.models.evaluate_model import calculate_metrics
 
-# Loglama yapılandırması
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -41,19 +39,15 @@ def create_voting_ensemble(models, model_weights=None):
     """
     logger.info("Oylama tabanlı topluluk modeli oluşturuluyor")
     
-    # Model isimlerini oluştur
     model_names = [f'model_{i}' for i in range(len(models))]
     
-    # Modelleri ve isimlerini birleştir
     named_models = list(zip(model_names, models))
     
-    # Ağırlıklar belirtilmişse kontrol et
     if model_weights is not None:
         if len(model_weights) != len(models):
             logger.warning(f"Model sayısı ({len(models)}) ve ağırlık sayısı ({len(model_weights)}) uyuşmuyor. Eşit ağırlıklar kullanılıyor.")
             model_weights = None
     
-    # Topluluk modeli oluştur
     ensemble = VotingRegressor(estimators=named_models, weights=model_weights)
     
     logger.info(f"Oylama modeli oluşturuldu: {len(models)} model")
@@ -73,17 +67,13 @@ def create_stacking_ensemble(base_models, meta_model=None):
     """
     logger.info("Yığınlama tabanlı topluluk modeli oluşturuluyor")
     
-    # Model isimlerini oluştur
     model_names = [f'model_{i}' for i in range(len(base_models))]
     
-    # Modelleri ve isimlerini birleştir
     named_models = list(zip(model_names, base_models))
     
-    # Meta model kontrol et
     if meta_model is None:
         meta_model = Ridge()
     
-    # Topluluk modeli oluştur
     ensemble = StackingRegressor(estimators=named_models, final_estimator=meta_model)
     
     logger.info(f"Yığınlama modeli oluşturuldu: {len(base_models)} temel model, meta model: {type(meta_model).__name__}")
@@ -104,7 +94,6 @@ def create_bagging_ensemble(base_estimator, n_estimators=10, random_state=42):
     """
     logger.info(f"Torbalama tabanlı topluluk modeli oluşturuluyor: {n_estimators} tahminleyici")
     
-    # Topluluk modeli oluştur
     ensemble = BaggingRegressor(
         estimator=base_estimator,
         n_estimators=n_estimators,
@@ -133,7 +122,6 @@ def create_boosting_ensemble(X_train, y_train, base_estimator='dt', n_estimators
     """
     logger.info(f"Güçlendirme tabanlı topluluk modeli oluşturuluyor: {n_estimators} tahminleyici")
     
-    # Temel model ayarla
     if isinstance(base_estimator, str):
         # Model sınıfını al
         model_class = None
@@ -149,7 +137,6 @@ def create_boosting_ensemble(X_train, y_train, base_estimator='dt', n_estimators
         # Temel model oluştur (basit parametrelerle)
         base_estimator = model_class(max_depth=3, random_state=random_state)
     
-    # Topluluk modeli oluştur
     ensemble = AdaBoostRegressor(
         estimator=base_estimator,
         n_estimators=n_estimators,
@@ -157,7 +144,6 @@ def create_boosting_ensemble(X_train, y_train, base_estimator='dt', n_estimators
         random_state=random_state
     )
     
-    # Modeli eğit
     ensemble.fit(X_train, y_train)
     
     logger.info(f"Güçlendirme modeli oluşturuldu: {type(base_estimator).__name__} temel model, {n_estimators} tahminleyici")

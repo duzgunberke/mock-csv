@@ -20,6 +20,7 @@ def get_project_root():
     current_path = Path(os.path.abspath(__file__))
     # src/data/data_loader.py'dan 2 seviye yukarı çıkıyoruz
     project_root = current_path.parent.parent.parent
+    print(f"Proje kök dizini: {project_root}")
     return project_root
 
 
